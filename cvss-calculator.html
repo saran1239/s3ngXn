@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CVSS v3.1 Calculator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2rem; background: #f8f9fa; color: #333; }
+    h1 { text-align: center; }
+    label { display: block; margin: 1rem 0 0.5rem; }
+    select { padding: 0.3rem; }
+    .result { margin-top: 2rem; padding: 1rem; border: 1px solid #ccc; background: #fff; }
+    button { margin-top: 1.5rem; padding: 0.5rem 1.5rem; background: #007bff; color: white; border: none; border-radius: 5px; }
+    button:hover { background: #0056b3; }
+  </style>
+</head>
+<body>
+  <h1>CVSS v3.1 Calculator</h1>
+  
+  <form id="cvssForm">
+    <label for="av">Attack Vector (AV):</label>
+    <select id="av">
+      <option value="0.85">Network</option>
+      <option value="0.62">Adjacent</option>
+      <option value="0.55">Local</option>
+      <option value="0.2">Physical</option>
+    </select>
+
+    <label for="ac">Attack Complexity (AC):</label>
+    <select id="ac">
+      <option value="0.77">Low</option>
+      <option value="0.44">High</option>
+    </select>
+
+    <label for="pr">Privileges Required (PR):</label>
+    <select id="pr">
+      <option value="0.85">None</option>
+      <option value="0.62">Low</option>
+      <option value="0.27">High</option>
+    </select>
+
+    <label for="ui">User Interaction (UI):</label>
+    <select id="ui">
+      <option value="0.85">None</option>
+      <option value="0.62">Required</option>
+    </select>
+
+    <label for="scope">Scope (S):</label>
+    <select id="scope">
+      <option value="U">Unchanged</option>
+      <option value="C">Changed</option>
+    </select>
+
+    <label for="conf">Confidentiality Impact (C):</label>
+    <select id="conf">
+      <option value="0">None</option>
+      <option value="0.22">Low</option>
+      <option value="0.56">High</option>
+    </select>
+
+    <label for="integ">Integrity Impact (I):</label>
+    <select id="integ">
+      <option value="0">None</option>
+      <option value="0.22">Low</option>
+      <option value="0.56">High</option>
+    </select>
+
+    <label for="avail">Availability Impact (A):</label>
+    <select id="avail">
+      <option value="0">None</option>
+      <option value="0.22">Low</option>
+      <option value="0.56">High</option>
+    </select>
+
+    <button type="button" onclick="calculateCVSS()">Calculate</button>
+  </form>
+
+  <div class="result" id="result">Score: - </div>
+
+  <script>
+    function calculateCVSS() {
+      const av = parseFloat(document.getElementById('av').value);
+      const ac = parseFloat(document.getElementById('ac').value);
+      const pr = parseFloat(document.getElementById('pr').value);
+      const ui = parseFloat(document.getElementById('ui').value);
+      const scope = document.getElementById('scope').value;
+      const c = parseFloat(document.getElementById('conf').value);
+      const i = parseFloat(document.getElementById('integ').value);
+      const a = parseFloat(document.getElementById('avail').value);
+
+      const impactSub = 1 - ((1 - c) * (1 - i) * (1 - a));
+      const impact = scope === "U" ? 6.42 * impactSub : 7.52 * (impactSub - 0.029) - 3.25 * Math.pow((impactSub - 0.02), 15);
+      const exploitab = 8.22 * av * ac * pr * ui;
+      let baseScore = 0;
+
+      if (impact <= 0) {
+        baseScore = 0;
+      } else if (scope === "U") {
+        baseScore = Math.min(impact + exploitab, 10);
+      } else {
+        baseScore = Math.min(1.08 * (impact + exploitab), 10);
+      }
+
+      document.getElementById('result').innerText = "Score: " + baseScore.toFixed(1);
+    }
+  </script>
+</body>
+</html>
